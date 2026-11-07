@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#080808" />
+  <title>M. Afdal Huda — Portfolio</title>
+  <meta name="description" content="Personal portfolio of M. Afdal Huda — Informatics Management student, aspiring engineer, and technology enthusiast." />
+
+  <!-- Fonts: Space Grotesk (display) + Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Tentukan tema SEBELUM render pertama → tidak ada "flash".
+       Urutan prioritas: pilihan yang disimpan pengunjung → tema browser/OS → gelap -->
+  <script>
+    (function () {
+      var t = null;
+      try { var s = localStorage.getItem("afdal-theme"); if (s === "light" || s === "dark") t = s; } catch (e) {}
+      if (!t) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Cahaya oranye yang mengikuti kursor (digerakkan JS, otomatis nonaktif di layar sentuh) -->
+  <div class="spotlight" id="spotlight" aria-hidden="true"></div>
+
+  <!-- ===== NAVBAR ===== -->
+  <header class="navbar" id="navbar">
+    <nav class="navbar__inner" aria-label="Navigasi utama">
+      <a href="#hero" class="navbar__brand">
+        <span class="navbar__dot" aria-hidden="true"></span>
+        Afdal<span class="navbar__brand-accent"></span>
+      </a>
+
+      <ul class="navbar__links" id="navLinks">
+        <li><a href="#hero" class="navbar__link is-active" data-nav data-i18n="nav.home">Home</a></li>
+        <li><a href="#about" class="navbar__link" data-nav data-i18n="nav.about">About</a></li>
+        <li><a href="#skills" class="navbar__link" data-nav data-i18n="nav.skills">Skills</a></li>
+        <li><a href="#projects" class="navbar__link" data-nav data-i18n="nav.projects">Projects</a></li>
+        <li><a href="#education" class="navbar__link" data-nav data-i18n="nav.education">Education</a></li>
+        <li><a href="#contact" class="navbar__link" data-nav data-i18n="nav.contact">Contact</a></li>
+      </ul>
+
+      <div class="navbar__actions">
+        <button class="nav-chip" id="langToggle" aria-label="Switch language / Ganti bahasa">EN</button>
+
+        <button class="nav-chip" id="themeToggle" aria-label="Toggle light/dark mode">
+          <!-- Matahari: tampil di dark mode (klik → light) -->
+          <svg class="nav-chip__icon nav-chip__icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+          <!-- Bulan: tampil di light mode (klik → dark) -->
+          <svg class="nav-chip__icon nav-chip__icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+          </svg>
+        </button>
+
+        <button class="navbar__toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Buka menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="hero">
+      <!-- Ambient "lava lamp" hitam–biru tua (pure CSS, hanya di Home) -->
+      <div class="hero__ambient" aria-hidden="true">
+        <span class="hero__blob hero__blob--1"></span>
+        <span class="hero__blob hero__blob--2"></span>
+        <span class="hero__blob hero__blob--3"></span>
+        <span class="hero__blob hero__blob--4"></span>
+      </div>
+      <div class="hero__glow" aria-hidden="true"></div>
+
+      <div class="hero__content">
+
+        <!-- Foto profil (kokarde) dengan tilt 3D -->
+        <div class="badge" id="profileBadge" data-reveal>
+          <div class="badge__frame">
+            <!--
+              GANTI FOTO: hapus div .badge__placeholder di bawah,
+              lalu aktifkan tag <img> dengan foto kamu di assets/images/
+            -->
+            <!-- <div class="badge__placeholder" aria-hidden="true">AH</div> -->
+            <img src="assets/images/profile.jpg" alt="Foto M. Afdal Huda" class="badge__photo" />
+            <div class="badge__shine" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <h1 class="hero__title" data-reveal data-reveal-delay="1">
+          <span data-i18n="hero.greeting">Hi, My name is</span>
+          <span class="hero__name">M.&nbsp;Afdal&nbsp;Huda<span class="hero__name-dot">.</span></span>
+        </h1>
+
+        <p class="hero__subtitle" data-reveal data-reveal-delay="2" data-i18n="hero.subtitle">
+          An aspiring engineer who loves technology, creativity, and solving problems.
+        </p>
+
+        <div class="hero__actions" data-reveal data-reveal-delay="3">
+          <a href="#projects" class="btn btn--primary">
+            <span data-i18n="hero.cta1">Explore My Work</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="#contact" class="btn btn--ghost" data-i18n="hero.cta2">Get In Touch</a>
+        </div>
+
+      </div>
+
+      <a href="#about" class="hero__scroll" aria-label="Scroll ke bawah">
+        <span class="hero__scroll-mouse" aria-hidden="true"><span></span></span>
+        <span class="hero__scroll-text" data-i18n="hero.scroll">Scroll</span>
+      </a>
+    </section>
+
+    <!-- ===== ABOUT ===== -->
+    <section class="section" id="about">
+      <div class="container">
+        <div class="section-header" data-reveal>
+          <span class="section-header__label" data-i18n="about.label">About</span>
+          <h2 class="section-header__title" data-i18n="about.title">About <span class="text-accent">Me</span></h2>
+        </div>
+
+        <div class="about__card glass-card" data-reveal data-reveal-delay="1">
+          <p class="about__lead" data-i18n="about.lead">
+            I'm <strong>M. Afdal Huda</strong>, an Informatics Management student with a deep
+            curiosity for how technology works — from the code that powers applications
+            to the hardware that runs them.
+          </p>
+          <p class="about__text" data-i18n="about.text">
+            I enjoy learning programming, exploring computer hardware, and building things
+            for the web. For me, engineering is about creativity and problem solving:
+            understanding a problem deeply, then crafting a solution that is simple,
+            useful, and well-made.
+          </p>
+
+          <ul class="about__chips">
+            <li class="chip" data-i18n="about.chip1">🎓 Informatics Management Student</li>
+            <li class="chip" data-i18n="about.chip2">⚙️ Aspiring Engineer</li>
+            <li class="chip" data-i18n="about.chip3">💡 Technology Enthusiast</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SKILLS ===== -->
+    <section class="section" id="skills">
+      <div class="container">
+        <div class="section-header" data-reveal>
+          <span class="section-header__label" data-i18n="skills.label">Skills</span>
+          <h2 class="section-header__title" data-i18n="skills.title">Skills & <span class="text-accent">Interests</span></h2>
+          <p class="section-header__desc" data-i18n="skills.desc">Areas I'm actively learning and passionate about.</p>
+        </div>
+
+        <div class="skills__grid">
+
+          <article class="skill-card glass-card" data-reveal data-reveal-delay="1">
+            <div class="skill-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m8 7-5 5 5 5M16 7l5 5-5 5M13 4l-2 16"/>
+              </svg>
+            </div>
+            <h3 class="skill-card__title" data-i18n="skills.s1t">Programming</h3>
+            <p class="skill-card__desc" data-i18n="skills.s1d">Learning to write clean, logical code and turn ideas into working software.</p>
+          </article>
+
+          <article class="skill-card glass-card" data-reveal data-reveal-delay="2">
+            <div class="skill-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.5 3v3M14.5 3v3M9.5 18v3M14.5 18v3M3 9.5h3M3 14.5h3M18 9.5h3M18 14.5h3"/>
+                <rect x="6" y="6" width="12" height="12" rx="2"/><rect x="10" y="10" width="4" height="4" rx="1"/>
+              </svg>
+            </div>
+            <h3 class="skill-card__title" data-i18n="skills.s2t">Computer Hardware</h3>
+            <p class="skill-card__desc" data-i18n="skills.s2d">Fascinated by how machines work — components, assembly, and performance.</p>
+          </article>
+
+          <article class="skill-card glass-card" data-reveal data-reveal-delay="3">
+            <div class="skill-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.9 5.7 3.9 9S14.5 18.4 12 21c-2.5-2.6-3.9-5.7-3.9-9S9.5 5.6 12 3Z"/>
+              </svg>
+            </div>
+            <h3 class="skill-card__title" data-i18n="skills.s3t">Web Development</h3>
+            <p class="skill-card__desc" data-i18n="skills.s3d">Building responsive, interactive experiences with HTML, CSS, and JavaScript.</p>
+          </article>
+
+          <article class="skill-card glass-card" data-reveal data-reveal-delay="4">
+            <div class="skill-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3a6 6 0 0 1 3.6 10.8c-.6.5-.6 1.2-.6 2.2h-6c0-1-.1-1.7-.7-2.2A6 6 0 0 1 12 3ZM9.5 19h5M10.5 22h3"/>
+              </svg>
+            </div>
+            <h3 class="skill-card__title" data-i18n="skills.s4t">Problem Solving</h3>
+            <p class="skill-card__desc" data-i18n="skills.s4d">Breaking big problems into small steps and finding elegant solutions.</p>
+          </article>
+
+          <article class="skill-card glass-card" data-reveal data-reveal-delay="5">
+            <div class="skill-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2Z"/>
+              </svg>
+            </div>
+            <h3 class="skill-card__title" data-i18n="skills.s5t">Technology & Engineering</h3>
+            <p class="skill-card__desc" data-i18n="skills.s5d">Always exploring new tools, systems, and how things are engineered.</p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PROJECTS ===== -->
+    <section class="section" id="projects">
+      <div class="container">
+        <div class="section-header" data-reveal>
+          <span class="section-header__label" data-i18n="projects.label">Projects</span>
+          <h2 class="section-header__title" data-i18n="projects.title">Featured <span class="text-accent">Projects</span></h2>
+        </div>
+
+        <div class="projects__grid">
+
+          <article class="project-card glass-card" data-reveal data-reveal-delay="1">
+            <div class="project-card__media">
+              <!-- GANTI SCREENSHOT: letakkan gambar di assets/images/ lalu
+                   aktifkan <img> di bawah & hapus div placeholder -->
+              <div class="project-card__media-placeholder" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4-4-6 6-2-2-6 6"/>
+                </svg>
+              </div>
+              <!-- <img src="assets/images/portal-mibers.jpg" alt="Tampilan Portal-MiBers" loading="lazy" /> -->
+            </div>
+            <div class="project-card__body">
+              <h3 class="project-card__title">Portal-MiBers</h3>
+              <p class="project-card__desc" data-i18n="projects.p1d">
+                A class information portal — a central hub for announcements,
+                schedules, and shared resources for my classmates.
+              </p>
+              <ul class="project-card__tags">
+                <li class="chip chip--sm" data-i18n="projects.p1tag1">Web</li>
+                <li class="chip chip--sm" data-i18n="projects.p1tag2">Information Portal</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="project-card glass-card project-card--soon" data-reveal data-reveal-delay="2">
+            <div class="project-card__media">
+              <div class="project-card__media-placeholder" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </div>
+            </div>
+            <div class="project-card__body">
+              <h3 class="project-card__title" data-i18n="projects.soon">Coming Soon</h3>
+              <p class="project-card__desc" data-i18n="projects.p2d">A new project is in the works. Stay tuned.</p>
+              <ul class="project-card__tags"><li class="chip chip--sm" data-i18n="projects.tag2">In Progress</li></ul>
+            </div>
+          </article>
+
+          <article class="project-card glass-card project-card--soon" data-reveal data-reveal-delay="3">
+            <div class="project-card__media">
+              <div class="project-card__media-placeholder" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </div>
+            </div>
+            <div class="project-card__body">
+              <h3 class="project-card__title" data-i18n="projects.soon">Coming Soon</h3>
+              <p class="project-card__desc" data-i18n="projects.p3d">Space reserved for the next big idea.</p>
+              <ul class="project-card__tags"><li class="chip chip--sm" data-i18n="projects.tag3">Future</li></ul>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== EDUCATION ===== -->
+    <section class="section" id="education">
+      <div class="container container--narrow">
+        <div class="section-header" data-reveal>
+          <span class="section-header__label" data-i18n="edu.label">Education</span>
+          <h2 class="section-header__title" data-i18n="edu.title">My <span class="text-accent">Journey</span></h2>
+        </div>
+
+        <!-- EDIT DI SINI: ganti nama sekolah & tahun sesuai riwayatmu -->
+        <ol class="timeline">
+          <li class="timeline__item" data-reveal data-reveal-delay="1">
+            <div class="timeline__node" aria-hidden="true"></div>
+            <div class="timeline__card glass-card">
+              <span class="timeline__period" data-i18n="edu.e1p">Now</span>
+              <h3 class="timeline__title" data-i18n="edu.e1t">Informatics Management</h3>
+              <p class="timeline__desc" data-i18n="edu.e1d">Currently studying — focusing on programming, information systems, and technology.</p>
+            </div>
+          </li>
+          <li class="timeline__item" data-reveal data-reveal-delay="2">
+            <div class="timeline__node" aria-hidden="true"></div>
+            <div class="timeline__card glass-card">
+              <span class="timeline__period" data-i18n="edu.e2p">Year — Year</span>
+              <h3 class="timeline__title" data-i18n="edu.e2t">Senior High School</h3>
+              <p class="timeline__desc" data-i18n="edu.e2d">[Nama sekolah] — where my interest in technology began to grow.</p>
+            </div>
+          </li>
+          <li class="timeline__item" data-reveal data-reveal-delay="3">
+            <div class="timeline__node" aria-hidden="true"></div>
+            <div class="timeline__card glass-card">
+              <span class="timeline__period" data-i18n="edu.e3p">Year — Year</span>
+              <h3 class="timeline__title" data-i18n="edu.e3t">Junior High School</h3>
+              <p class="timeline__desc" data-i18n="edu.e3d">[Nama sekolah] — early curiosity about computers.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section class="section" id="contact">
+      <div class="container container--narrow">
+        <div class="section-header" data-reveal>
+          <span class="section-header__label" data-i18n="contact.label">Contact</span>
+          <h2 class="section-header__title" data-i18n="contact.title">Get In <span class="text-accent">Touch</span></h2>
+          <p class="section-header__desc" data-i18n="contact.desc">Have an idea, a question, or just want to say hi? My inbox is open.</p>
+        </div>
+
+        <div class="contact__card glass-card" data-reveal data-reveal-delay="1">
+          <!-- GANTI: email & link sosial media kamu -->
+          <a href="https://wa.me/+6282246830376" class="btn btn--primary contact__email" data-i18n="contact.wa">
+            Whatsapp Me
+          </a>
+
+          <div class="contact__socials">
+            <a href="https://github.com/afdalhuda" class="social-link" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.1.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.3 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85V21c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/>
+              </svg>
+            </a>
+            <a href="https://instagram.com/afdalhudaa" class="social-link" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.8" fill="currentColor" stroke="none"/>
+              </svg>
+            </a>
+            <a href="https://linkedin.com/in/afdalhuda" class="social-link" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1-.02-5ZM3 9.5h4V21H3V9.5Zm6.5 0h3.8v1.6h.06c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.77 2.65 4.77 6.1V21h-4v-5.2c0-1.24-.02-2.84-1.73-2.84-1.73 0-2 1.35-2 2.75V21h-3.97V9.5Z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p data-i18n="footer.text">© 2026 M. Afdal Huda — Designed & built with curiosity.</p>
+  </footer>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>

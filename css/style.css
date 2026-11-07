@@ -1,0 +1,975 @@
+/* ============================================
+   AFDAL PORTFOLIO — STYLE (FINAL)
+   1. Tokens      2. Base       3. Spotlight
+   4. Navbar      5. Hero       6. Badge
+   7. Buttons     8. Sections   9. Reveal
+   10. Responsive & Motion   11. Transisi tema
+   ============================================ */
+
+/* ---------- 1. DESIGN TOKENS ---------- */
+:root {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Tema gelap (default) */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;   /* scrollbar & kontrol bawaan browser ikut gelap */
+
+  --bg-primary: #080808;
+  --bg-secondary: #151515;
+  --accent: #FF7A18;
+  --accent-soft: rgba(255, 122, 24, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-highlight: rgba(255, 255, 255, 0.18);
+  --text-primary: #F5F5F5;
+  --text-secondary: #9CA3AF;
+
+  --navbar-bg: rgba(8, 8, 8, 0.55);
+  --navbar-bg-scrolled: rgba(8, 8, 8, 0.78);
+  --navbar-bg-solid: rgba(10, 10, 16, 0.92);   /* mobile: tanpa blur induk */
+  --menu-bg: rgba(10, 12, 20, 0.72);           /* panel menu mobile (di-blur) */
+  --chip-bg: rgba(255, 255, 255, 0.05);
+  --media-bg: linear-gradient(145deg, #1a1a1a, #0e0e0e);
+  --media-ph: rgba(255, 255, 255, 0.18);
+
+  /* Ambient hero: hitam → biru tua */
+  --hero-bg: radial-gradient(120% 90% at 50% 0%,
+      #0a1535 0%, #071027 45%, #050508 100%);
+  --blob-1: rgba(14, 58, 138, 0.50);
+  --blob-2: rgba(10, 42, 110, 0.45);
+  --blob-3: rgba(6, 27, 69, 0.55);
+  --blob-4: rgba(23, 78, 166, 0.35);
+
+  /* Cahaya yang mengikuti kursor */
+  --spotlight-core: rgba(255, 122, 24, 0.20);
+  --spotlight-mid:  rgba(255, 122, 24, 0.07);
+}
+
+/* Tema terang */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-primary: #F4F5F8;
+  --bg-secondary: #EAEDF2;
+  --accent: #E2610A;
+  --accent-soft: rgba(226, 97, 10, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(15, 20, 40, 0.10);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --text-primary: #171A21;
+  --text-secondary: #525A68;
+
+  --navbar-bg: rgba(255, 255, 255, 0.55);
+  --navbar-bg-scrolled: rgba(255, 255, 255, 0.8);
+  --navbar-bg-solid: rgba(252, 252, 254, 0.95);
+  --menu-bg: rgba(255, 255, 255, 0.75);
+  --chip-bg: rgba(15, 20, 40, 0.04);
+  --media-bg: linear-gradient(145deg, #e6e9f0, #f2f4f8);
+  --media-ph: rgba(15, 20, 40, 0.25);
+
+  /* Ambient hero versi terang: biru lembut */
+  --hero-bg: radial-gradient(120% 90% at 50% 0%,
+      #dbe6fb 0%, #e9eef9 55%, #f4f5f8 100%);
+  --blob-1: rgba(70, 120, 220, 0.25);
+  --blob-2: rgba(40, 90, 190, 0.20);
+  --blob-3: rgba(100, 150, 240, 0.22);
+  --blob-4: rgba(30, 70, 160, 0.18);
+
+  --spotlight-core: rgba(226, 97, 10, 0.17);
+  --spotlight-mid:  rgba(226, 97, 10, 0.06);
+}
+
+/* ---------- 2. BASE ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+ol { list-style: none; }
+
+/* ---------- 3. SPOTLIGHT (mengikuti kursor) ----------
+   Dulu: z-index 0 (di BELAKANG <main>) sehingga tertutup background hero &
+   section genap, ditambah alpha hanya 0.07 → praktis tak terlihat.
+   Sekarang: berada DI ATAS konten (z-index 50) tapi di bawah navbar (100),
+   pointer-events: none → tidak menghalangi klik. */
+.spotlight {
+  position: fixed;
+  top: 0; left: 0;
+  width: 620px; height: 620px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    var(--spotlight-core) 0%,
+    var(--spotlight-mid) 42%,
+    transparent 70%);
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+  /* Offset -50% via margin, karena transform ditimpa JS dengan posisi kursor */
+  margin: -310px 0 0 -310px;
+  will-change: transform;
+  transition: opacity 0.5s ease;
+}
+
+.spotlight.is-active { opacity: 1; }
+
+main, .navbar, .footer { position: relative; z-index: 1; }
+
+/* ---------- 4. NAVBAR ---------- */
+.navbar {
+  position: fixed;
+  top: 16px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  width: min(92%, 760px);
+}
+
+.navbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--navbar-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 8px 32px rgba(0, 0, 0, 0.45);
+  transition: padding var(--transition), background var(--transition),
+              box-shadow var(--transition);
+}
+
+/* Navbar memadat setelah scroll (class dipasang JS — Modul 6) */
+.navbar.is-scrolled .navbar__inner {
+  padding: 7px 16px;
+  background: var(--navbar-bg-scrolled);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 10px 36px rgba(0, 0, 0, 0.6);
+}
+
+/* --- Aksi kanan navbar: bahasa + tema + hamburger --- */
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--chip-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition),
+              background var(--transition), transform var(--transition);
+}
+
+.nav-chip:hover {
+  color: var(--accent);
+  border-color: rgba(255, 122, 24, 0.4);
+  transform: translateY(-1px);
+}
+
+.nav-chip__icon { width: 16px; height: 16px; }
+
+/* Dark mode → tampilkan ikon matahari; Light mode → bulan */
+.nav-chip__icon--moon { display: none; }
+:root[data-theme="light"] .nav-chip__icon--sun { display: none; }
+:root[data-theme="light"] .nav-chip__icon--moon { display: block; }
+
+.navbar__brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar__dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.navbar__brand-accent { color: var(--accent); }
+
+.navbar__links { display: flex; gap: 4px; }
+
+.navbar__link {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  transition: color var(--transition), background var(--transition);
+}
+
+.navbar__link:hover { color: var(--text-primary); }
+
+.navbar__link.is-active {
+  color: var(--text-primary);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px rgba(255, 122, 24, 0.25);
+}
+
+.navbar__toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.navbar__toggle span {
+  width: 22px; height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+/* ---------- 5. HERO ---------- */
+.hero {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  padding: 120px 24px 80px;
+  overflow: hidden;
+  background: var(--hero-bg);
+}
+
+/* --- Ambient "lava lamp" hitam–biru tua (khusus Home) --- */
+.hero__ambient {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.hero__blob--1 {
+  width: 48vmax; height: 48vmax;
+  left: -14%; top: -18%;
+  background: radial-gradient(circle at 35% 35%, var(--blob-1), transparent 70%);
+  animation: lavaDrift1 26s ease-in-out infinite alternate;
+}
+
+.hero__blob--2 {
+  width: 40vmax; height: 40vmax;
+  right: -12%; top: 5%;
+  background: radial-gradient(circle at 60% 40%, var(--blob-2), transparent 70%);
+  animation: lavaDrift2 32s ease-in-out infinite alternate;
+}
+
+.hero__blob--3 {
+  width: 44vmax; height: 44vmax;
+  left: 10%; bottom: -25%;
+  background: radial-gradient(circle at 50% 50%, var(--blob-3), transparent 70%);
+  animation: lavaDrift3 38s ease-in-out infinite alternate;
+}
+
+.hero__blob--4 {
+  width: 30vmax; height: 30vmax;
+  right: 15%; bottom: -8%;
+  background: radial-gradient(circle at 45% 55%, var(--blob-4), transparent 70%);
+  animation: lavaDrift4 22s ease-in-out infinite alternate;
+}
+
+@keyframes lavaDrift1 {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(10vw, 14vh, 0) scale(1.2); }
+  100% { transform: translate3d(4vw, 26vh, 0) scale(0.95); }
+}
+
+@keyframes lavaDrift2 {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-12vw, 18vh, 0) scale(1.25); }
+  100% { transform: translate3d(-5vw, 4vh, 0) scale(1.05); }
+}
+
+@keyframes lavaDrift3 {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(14vw, -16vh, 0) scale(1.15); }
+  100% { transform: translate3d(-6vw, -4vh, 0) scale(0.9); }
+}
+
+@keyframes lavaDrift4 {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-10vw, -20vh, 0) scale(1.3); }
+  100% { transform: translate3d(6vw, -8vh, 0) scale(1); }
+}
+
+.hero__glow {
+  position: absolute;
+  top: 12%; left: 50%;
+  transform: translateX(-50%);
+  width: 640px; height: 640px;
+  background: radial-gradient(circle,
+    rgba(255, 122, 24, 0.14) 0%,
+    rgba(255, 122, 24, 0.05) 40%,
+    transparent 70%);
+  pointer-events: none;
+  filter: blur(20px);
+}
+
+.hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  position: relative;
+  z-index: 1;
+  max-width: 820px;
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 6.5vw, 4.8rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.hero__name {
+  display: block;
+  background: linear-gradient(100deg, #FFFFFF 10%, #FFB169 55%, var(--accent) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 24px rgba(255, 122, 24, 0.35));
+}
+
+/* Light mode: gradien nama dimulai dari warna gelap agar tetap terbaca */
+:root[data-theme="light"] .hero__name {
+  background: linear-gradient(100deg, #171A21 10%, #B4530B 55%, var(--accent) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(226, 97, 10, 0.25));
+}
+
+.hero__name-dot { color: var(--accent); }
+
+.hero__subtitle {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--text-secondary);
+  max-width: 540px;
+}
+
+.hero__actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.hero__scroll {
+  position: absolute;
+  bottom: 15px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color var(--transition);
+}
+
+.hero__scroll:hover { color: var(--accent); }
+
+.hero__scroll-mouse {
+  width: 24px; height: 38px;
+  border: 1.5px solid currentColor;
+  border-radius: 14px;
+  display: flex;
+  justify-content: center;
+  padding-top: 7px;
+}
+
+.hero__scroll-mouse span {
+  width: 3px; height: 7px;
+  border-radius: 2px;
+  background: currentColor;
+  animation: scrollWheel 1.8s ease-in-out infinite;
+}
+
+@keyframes scrollWheel {
+  0%   { transform: translateY(0);    opacity: 1; }
+  70%  { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 0; }
+}
+
+/* ---------- 6. BADGE (foto profil) ---------- */
+.badge {
+  perspective: 700px;
+  animation: badgeFloat 5.5s ease-in-out infinite;
+}
+
+@keyframes badgeFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+
+.badge__frame {
+  position: relative;
+  width: clamp(140px, 20vw, 190px);
+  aspect-ratio: 1;
+  border-radius: 32px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 0 0 1px rgba(255, 122, 24, 0.25),
+    0 0 40px rgba(255, 122, 24, 0.18),
+    0 20px 50px rgba(0, 0, 0, 0.5);
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.badge__frame.is-tilting {
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 0 0 1px rgba(255, 122, 24, 0.45),
+    0 0 60px rgba(255, 122, 24, 0.30),
+    0 24px 60px rgba(0, 0, 0, 0.55);
+  transition: box-shadow var(--transition);
+}
+
+.badge__frame:active {
+  transform: scale(0.97);
+  transition: transform 0.15s ease;
+}
+
+.badge__placeholder {
+  width: 100%; height: 100%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.6rem, 5vw, 3.6rem);
+  color: var(--accent);
+  background: linear-gradient(145deg, #1c1c1c, #0d0d0d);
+}
+
+.badge__photo {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.badge__shine {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--shine-x, 30%) var(--shine-y, 20%),
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0.07) 32%,
+    transparent 62%
+  );
+  pointer-events: none;
+}
+
+/* ---------- 7. BUTTONS ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 28px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 0.92rem;
+  border: 1px solid transparent;
+  transition: transform var(--transition), box-shadow var(--transition),
+              background var(--transition), border-color var(--transition);
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--accent), #E2610A);
+  color: #0c0c0c;
+  box-shadow: 0 0 24px rgba(255, 122, 24, 0.35);
+}
+
+.btn--primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 40px rgba(255, 122, 24, 0.55);
+}
+
+.btn--ghost {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  color: var(--text-primary);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+}
+
+.btn--ghost:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 122, 24, 0.4);
+  background: var(--accent-soft);
+}
+
+/* ---------- 8. SECTIONS & COMPONENTS ---------- */
+.container {
+  width: min(92%, 1080px);
+  margin-inline: auto;
+}
+
+.container--narrow { max-width: 720px; }
+
+.section {
+  padding: 110px 0;
+  position: relative;
+}
+
+.section:nth-of-type(even) { background: var(--bg-secondary); }
+
+.text-accent { color: var(--accent); }
+
+.section-header { margin-bottom: 48px; text-align: center; }
+
+.section-header__label {
+  display: inline-block;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.section-header__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  letter-spacing: -0.02em;
+}
+
+.section-header__desc {
+  color: var(--text-secondary);
+  margin-top: 10px;
+  max-width: 480px;
+  margin-inline: auto;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 12px 36px rgba(0, 0, 0, 0.35);
+  transition: transform var(--transition), box-shadow var(--transition),
+              border-color var(--transition);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  background: var(--chip-bg);
+  border: 1px solid var(--glass-border);
+}
+
+.chip--sm { padding: 4px 12px; font-size: 0.75rem; color: var(--text-secondary); }
+
+/* --- About --- */
+.about__card {
+  padding: clamp(28px, 5vw, 48px);
+  text-align: center;
+}
+
+.about__lead {
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  margin-bottom: 16px;
+}
+
+.about__lead strong { color: var(--accent); font-weight: 600; }
+
+.about__text {
+  color: var(--text-secondary);
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.about__chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+/* --- Skills --- */
+.skills__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.skill-card {
+  padding: 28px 24px;
+  text-align: left;
+}
+
+.skill-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 122, 24, 0.35);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 0 32px rgba(255, 122, 24, 0.12),
+    0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.skill-card__icon {
+  width: 48px; height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(255, 122, 24, 0.25);
+  margin-bottom: 18px;
+}
+
+.skill-card__icon svg { width: 24px; height: 24px; }
+
+.skill-card__title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.skill-card__desc { color: var(--text-secondary); font-size: 0.88rem; }
+
+/* --- Projects --- */
+.projects__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.project-card { overflow: hidden; }
+
+.project-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 122, 24, 0.35);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 0 32px rgba(255, 122, 24, 0.12),
+    0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.project-card__media {
+  aspect-ratio: 16 / 9;
+  background: var(--media-bg);
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.project-card__media img { width: 100%; height: 100%; object-fit: cover; }
+
+.project-card__media-placeholder { color: var(--media-ph); }
+
+.project-card__body { padding: 22px; }
+
+.project-card__title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.project-card__desc {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+}
+
+.project-card__tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.project-card--soon { opacity: 0.65; }
+.project-card--soon:hover { opacity: 1; }
+
+/* --- Education timeline --- */
+.timeline {
+  position: relative;
+  padding-left: 32px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 7px; top: 8px; bottom: 8px;
+  width: 2px;
+  background: linear-gradient(to bottom,
+    var(--accent),
+    rgba(255, 122, 24, 0.1));
+}
+
+.timeline__item { position: relative; padding-bottom: 28px; }
+.timeline__item:last-child { padding-bottom: 0; }
+
+.timeline__node {
+  position: absolute;
+  left: -32px; top: 8px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 14px rgba(255, 122, 24, 0.6);
+}
+
+.timeline__card { padding: 22px 26px; }
+
+.timeline__card:hover {
+  transform: translateX(6px);
+  border-color: rgba(255, 122, 24, 0.35);
+}
+
+.timeline__period {
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.timeline__title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  margin: 6px 0 4px;
+}
+
+.timeline__desc { color: var(--text-secondary); font-size: 0.88rem; }
+
+/* --- Contact --- */
+.contact__card {
+  padding: clamp(32px, 6vw, 56px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.contact__email { font-size: 1rem; }
+
+.contact__socials { display: flex; gap: 14px; }
+
+.social-link {
+  width: 48px; height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  transition: color var(--transition), transform var(--transition),
+              border-color var(--transition), box-shadow var(--transition);
+}
+
+.social-link svg { width: 20px; height: 20px; }
+
+.social-link:hover {
+  color: var(--accent);
+  transform: translateY(-4px);
+  border-color: rgba(255, 122, 24, 0.4);
+  box-shadow: 0 0 20px rgba(255, 122, 24, 0.2);
+}
+
+/* --- Footer --- */
+.footer {
+  padding: 36px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* ---------- 9. SCROLL REVEAL ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Stagger: elemen muncul bergiliran */
+.reveal[data-reveal-delay="1"] { transition-delay: 0.1s; }
+.reveal[data-reveal-delay="2"] { transition-delay: 0.2s; }
+.reveal[data-reveal-delay="3"] { transition-delay: 0.3s; }
+.reveal[data-reveal-delay="4"] { transition-delay: 0.4s; }
+.reveal[data-reveal-delay="5"] { transition-delay: 0.5s; }
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Badge punya animasi float sendiri → reveal-nya hanya fade */
+.badge.reveal { transform: none; }
+
+/* ---------- 10. RESPONSIVE & MOTION ---------- */
+@media (max-width: 720px) {
+  .navbar__toggle { display: flex; }
+
+  /*
+    FIX BUG MOBILE: backdrop-filter TIDAK berfungsi pada elemen
+    yang berada DI DALAM elemen lain yang juga punya backdrop-filter
+    (panel menu ada di dalam .navbar__inner yang di-blur).
+    Solusi: di mobile, navbar pakai background solid tanpa blur,
+    sehingga blur liquid-glass panel menu bekerja normal.
+  */
+  .navbar__inner {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--navbar-bg-solid);
+  }
+
+  .navbar.is-scrolled .navbar__inner {
+    background: var(--navbar-bg-solid);
+  }
+
+  .navbar__links {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0; right: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px;
+    border-radius: var(--radius-lg);
+    background: var(--menu-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      0 16px 48px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity var(--transition), transform var(--transition),
+                visibility var(--transition);
+  }
+
+  .navbar__links.is-open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .navbar__toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .navbar__toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .navbar__toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .hero { padding-top: 110px; }
+  .hero__actions { width: 100%; }
+  .btn { justify-content: center; flex: 1 1 auto; }
+
+  .section { padding: 80px 0; }
+}
+
+/* Spotlight tidak relevan di perangkat tanpa mouse (HP/tablet).
+   Dulu memakai max-width: 720px sehingga jendela desktop yang sempit
+   ikut kehilangan efeknya. */
+@media (hover: none), (pointer: coarse) {
+  .spotlight { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .badge, .hero__scroll-mouse span, .hero__blob { animation: none; }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  * { transition-duration: 0.01ms !important; }
+}
+
+/* ---------- 11. TRANSISI GANTI TEMA ----------
+   Jalur utama: View Transitions API → seluruh halaman (termasuk gradien &
+   blob hero yang tidak bisa di-transition oleh CSS biasa) cross-fade halus.
+   JS memasang class .theme-vt selama transisi berlangsung. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Matikan transition per-elemen selama cross-fade agar tidak "dobel animasi" */
+html.theme-vt,
+html.theme-vt *,
+html.theme-vt *::before,
+html.theme-vt *::after {
+  transition: none !important;
+}
+
+/* Cadangan untuk browser tanpa View Transitions: warna di-transition manual.
+   JS memasang class .theme-fade sekitar 0.6 detik saja. */
+html.theme-fade,
+html.theme-fade *,
+html.theme-fade *::before,
+html.theme-fade *::after {
+  transition: background-color 0.5s ease, color 0.5s ease,
+              border-color 0.5s ease, box-shadow 0.5s ease,
+              fill 0.5s ease, stroke 0.5s ease !important;
+}
