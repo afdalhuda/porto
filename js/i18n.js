@@ -54,16 +54,16 @@ window.AFDAL_TEXT = {
 
 
   /* ---------- HERO (halaman utama) ---------- */
-  "hero.greeting": { en: "Hi, My name is", id: "Hai, Nama saya" },
+  "hero.greeting": { en: "Hi, My name is", id: "Halo, Nama saya" },
 
   "hero.subtitle": {
-    en: "An aspiring engineer who loves technology, creativity, and solving problems.",
-    id: "Calon insinyur yang mencintai teknologi, kreativitas, dan pemecahan masalah.",
+    en: "An aspiring ENGINEER who loves technology, creativity, and solving problems.",
+    id: "Seorang calon ENGINEER yang memiliki minat besar pada teknologi, kreativitas, dan problem solving.",
   },
 
   "hero.cta1":   { en: "Explore My Work", id: "Lihat Karya Saya" },
-  "hero.cta2":   { en: "Get In Touch",    id: "Hubungi Saya" },
-  "hero.scroll": { en: "Scroll",          id: "Gulir" },
+  "hero.cta2":   { en: "Get In Touchh",   id: "Hubungi Saya" },
+  "hero.scroll": { en: "Scroll",          id: "Gulir ke Bawah" },
 
 
   /* ---------- ABOUT ---------- */
@@ -72,17 +72,17 @@ window.AFDAL_TEXT = {
 
   "about.lead": {
     en: "I'm **M. Afdal Huda**, an Informatics Management student with a deep curiosity for how technology works — from the code that powers applications to the hardware that runs them.",
-    id: "Saya **M. Afdal Huda**, mahasiswa Manajemen Informatika dengan rasa ingin tahu mendalam tentang cara kerja teknologi — dari kode yang menjalankan aplikasi hingga perangkat keras yang menopangnya.",
+    id: "Saya **M. Afdal Huda**, seorang mahasiswa Manajemen Informatika dengan ketertarikan mendalam terhadap cara kerja teknologi — mulai dari baris kode yang menggerakkan aplikasi hingga perangkat keras yang menopangnya.",
   },
 
   "about.text": {
     en: "I enjoy learning programming, exploring computer hardware, and building things for the web. For me, engineering is about creativity and problem solving: understanding a problem deeply, then crafting a solution that is simple, useful, and well-made.",
-    id: "Saya senang belajar pemrograman, mengeksplorasi perangkat keras komputer, dan membangun hal-hal untuk web. Bagi saya, rekayasa adalah soal kreativitas dan pemecahan masalah: memahami masalah secara mendalam, lalu merancang solusi yang sederhana, berguna, dan dibuat dengan baik.",
+    id: "Saya gemar mempelajari pemrograman, mengeksplorasi perangkat keras komputer, dan mengembangkan teknologi web. Bagi saya, dunia rekayasa (engineering) adalah tentang kreativitas dan pemecahan masalah: memahami suatu kendala secara menyeluruh, lalu merancang solusi yang praktis, bermanfaat, dan berkualitas tinggi.",
   },
 
   "about.chip1": { en: "🎓 Informatics Management Student", id: "🎓 Mahasiswa Manajemen Informatika" },
-  "about.chip2": { en: "⚙️ Aspiring Engineer",              id: "⚙️ Calon Insinyur" },
-  "about.chip3": { en: "💡 Technology Enthusiast",          id: "💡 Penggemar Teknologi" },
+  "about.chip2": { en: "⚙️ Aspiring ENGINEER",              id: "⚙️ Calon ENGINEER" },
+  "about.chip3": { en: "💡 Technology Enthusiast",          id: "💡 Penggiat Teknologi" },
 
 
   /* ---------- SKILLS ---------- */
@@ -91,37 +91,37 @@ window.AFDAL_TEXT = {
 
   "skills.desc": {
     en: "Areas I'm actively learning and passionate about.",
-    id: "Bidang yang sedang aktif saya pelajari dan saya minati.",
+    id: "Berbagai bidang yang sedang saya pelajari secara mendalam dan menjadi minat utama saya.",
   },
 
   "skills.s1t": { en: "Programming", id: "Pemrograman" },
   "skills.s1d": {
     en: "Learning to write clean, logical code and turn ideas into working software.",
-    id: "Belajar menulis kode yang bersih dan logis, serta mengubah ide menjadi perangkat lunak.",
+    id: "Mempelajari penulisan kode yang rapi dan terstruktur, serta mewujudkan gagasan menjadi perangkat lunak yang fungsional.",
   },
 
   "skills.s2t": { en: "Computer Hardware", id: "Perangkat Keras Komputer" },
   "skills.s2d": {
     en: "Fascinated by how machines work — components, assembly, and performance.",
-    id: "Terpukau oleh cara kerja mesin — komponen, perakitan, dan performa.",
+    id: "Memiliki ketertarikan besar pada cara kerja mesin — mulai dari komponen, proses perakitan, hingga optimasi performa.",
   },
 
   "skills.s3t": { en: "Web Development", id: "Pengembangan Web" },
   "skills.s3d": {
     en: "Building responsive, interactive experiences with HTML, CSS, and JavaScript.",
-    id: "Membangun pengalaman yang responsif dan interaktif dengan HTML, CSS, dan JavaScript.",
+    id: "Menciptakan antarmuka visual yang responsif dan interaktif menggunakan HTML, CSS, dan JavaScript.",
   },
 
   "skills.s4t": { en: "Problem Solving", id: "Pemecahan Masalah" },
   "skills.s4d": {
     en: "Breaking big problems into small steps and finding elegant solutions.",
-    id: "Memecah masalah besar menjadi langkah kecil dan menemukan solusi yang elegan.",
+    id: "Menguraikan masalah kompleks menjadi langkah-langkah sistematis untuk menemukan solusi yang efisien.",
   },
 
   "skills.s5t": { en: "Technology & Engineering", id: "Teknologi & Rekayasa" },
   "skills.s5d": {
     en: "Always exploring new tools, systems, and how things are engineered.",
-    id: "Selalu mengeksplorasi alat, sistem, dan cara segala sesuatu direkayasa.",
+    id: "Selalu antusias mengeksplorasi berbagai perangkat, sistem, dan bagaimana suatu teknologi dirancang.",
   },
 
 
@@ -131,44 +131,52 @@ window.AFDAL_TEXT = {
 
   "projects.p1d": {
     en: "A class information portal — a central hub for announcements, schedules, and shared resources for my classmates.",
-    id: "Portal informasi kelas — pusat pengumuman, jadwal, dan berbagi materi untuk teman sekelas saya.",
+    id: "Portal informasi kelas — sebuah pusat layanan terpadu untuk pengumuman, jadwal, dan berbagi materi pembelajaran bagi rekan-rekan mahasiswa.",
   },
   "projects.p1tag1": { en: "Web",                id: "Web" },
   "projects.p1tag2": { en: "Information Portal", id: "Portal Informasi" },
 
   "projects.soon": { en: "Coming Soon", id: "Segera Hadir" },
 
-  "projects.p2d":  { en: "A new project is in the works. Stay tuned.", id: "Proyek baru sedang dikerjakan. Nantikan." },
+  "projects.p2d":  { en: "A new project is in the works. Stay tuned.", id: "Sebuah proyek baru sedang dalam tahap pengembangan. Nantikan kehadirannya." },
   "projects.tag2": { en: "In Progress",                                id: "Sedang Berjalan" },
 
-  "projects.p3d":  { en: "Space reserved for the next big idea.", id: "Ruang untuk ide besar berikutnya." },
+  "projects.p3d":  { en: "Space reserved for the next big idea.", id: "Ruang yang dipersiapkan untuk gagasan besar selanjutnya." },
   "projects.tag3": { en: "Future",                                id: "Mendatang" },
 
 
   /* ---------- EDUCATION ---------- */
   "edu.label": { en: "Education",         id: "Pendidikan" },
-  "edu.title": { en: "My {Journey}",      id: "Perjalanan {Saya}" },
+  "edu.title": { en: "My {Journey}",      id: "Perjalanan {Akademik}" },
 
   "edu.e1p": { en: "Now", id: "Sekarang" },
-  "edu.e1t": { en: "Informatics Management", id: "Manajemen Informatika" },
+  "edu.e1t": { en: "Informatics Management PNP", id: "Manajemen Informatika PNP" },
   "edu.e1d": {
-    en: "Currently studying — focusing on programming, information systems, and technology.",
-    id: "Sedang menempuh studi — fokus pada pemrograman, sistem informasi, dan teknologi.",
+    en: "Currently studying at Padang State Polytechnic— focusing on programming, information systems, and technology.",
+    id: "Saat ini sedang menempuh pendidikan di Politeknik Negeri Padang— berfokus pada pemrograman, sistem informasi, dan teknologi terapan.",
   },
 
   // TODO: isi tahun & nama sekolah yang sebenarnya
-  "edu.e2p": { en: "Year — Year", id: "Tahun — Tahun" },
-  "edu.e2t": { en: "Senior High School", id: "Sekolah Menengah Atas" },
+  "edu.e2p": { en: "2025 — 2026", id: "2025 — 2026" },
+  "edu.e2t": { en: "Mechanical Engginering", id: "Teknik Mesin" },
   "edu.e2d": {
-    en: "[Nama sekolah] — where my interest in technology began to grow.",
-    id: "[Nama sekolah] — tempat minat saya pada teknologi mulai tumbuh.",
+    en: "I once studied Mechanical Engineering at Padang State University.",
+    id: "Sempat berkuliah Teknik Mesin di Universitas Negeri Padang.",
   },
 
   "edu.e3p": { en: "Year — Year", id: "Tahun — Tahun" },
   "edu.e3t": { en: "Junior High School", id: "Sekolah Menengah Pertama" },
   "edu.e3d": {
     en: "[Nama sekolah] — early curiosity about computers.",
-    id: "[Nama sekolah] — awal rasa penasaran terhadap komputer.",
+    id: "[Nama sekolah] — titik awal munculnya rasa ingin tahu saya terhadap dunia komputer.",
+  },
+
+  
+  "edu.e4p": { en: "2022 — 2025", id: "2022 — 2025" },
+  "edu.e4t": { en: "Senior High School", id: "Sekolah Menengah Atas" },
+  "edu.e4d": {
+    en: "SMAN 02 SOLSEL — where my interest in technology began to grow.",
+    id: "SMAN 02 SOLSEL — tempat di mana minat saya terhadap teknologi mulai berkembang pesat.",
   },
 
 
@@ -178,7 +186,7 @@ window.AFDAL_TEXT = {
 
   "contact.desc": {
     en: "Have an idea, a question, or just want to say hi? My inbox is open.",
-    id: "Punya ide, pertanyaan, atau sekadar ingin menyapa? Pesan saya selalu terbuka.",
+    id: "Memiliki ide, pertanyaan, atau sekadar ingin menyapa? Jangan ragu untuk menghubungi saya.",
   },
 
   "contact.wa": { en: "Whatsapp Me", id: "WhatsApp Saya" },
@@ -187,7 +195,7 @@ window.AFDAL_TEXT = {
   /* ---------- FOOTER ---------- */
   "footer.text": {
     en: "© 2026 M. Afdal Huda — Designed & built with curiosity.",
-    id: "© 2026 M. Afdal Huda — Didesain & dibuat dengan rasa ingin tahu.",
+    id: "© 2026 M. Afdal Huda — Dirancang & dibangun dengan dedikasi dan rasa ingin tahu.",
   },
 
 };
