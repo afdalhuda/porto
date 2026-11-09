@@ -195,7 +195,7 @@ window.AFDAL_TEXT = {
   /* ---------- FOOTER ---------- */
   "footer.text": {
     en: "© 2026 M. Afdal Huda — Designed & built with curiosity.",
-    id: "© 2026 M. Afdal Huda — Dirancang & dibangun dengan dedikasi dan rasa ingin tahu.",
+    id: "© 2026 M. Afdal Huda — Designed & built with curiosity.",
   },
 
 };
