@@ -2,7 +2,7 @@
    AFDAL PORTFOLIO — SCRIPT (FINAL)
    Modul:
    1. Mobile nav toggle
-   2. Badge tilt 3D + liquid shine
+   2. Kokarde lanyard (fisika tali + seret mouse)
    3. Mouse-following spotlight
    4. Scroll reveal (IntersectionObserver)
    5. Scrollspy — indikator navigasi aktif
@@ -47,91 +47,331 @@
 
 
   /* ============================================
-     MODUL 2 — BADGE TILT 3D + SHINE
-     (hanya perangkat ber-mouse, hormati reduced motion)
+     MODUL 2 — KOKARDE LANYARD (fisika tali + seret mouse)
+     Kartu portrait menggantung dengan tali dari tepi atas beranda.
+     • Fisika Verlet: rantai 10 ruas tali + kartu kaku (2 titik) di ujungnya
+     • Seret kartu ke mana saja (mouse / sentuh), lepas → berayun & dilempar
+     • Gerakkan mouse melewati kartu → kartu tersenggol sedikit
+     • Layer ada di dalam #hero → hanya di beranda; loop dijeda saat hero
+       tidak terlihat atau tab tidak aktif (hemat CPU)
+     Ukuran/posisi diatur CSS (--badge-w, --rope, .lanyard__anchor).
      ============================================ */
-  (function initBadgeTilt() {
+  (function initLanyard() {
     const hero = document.getElementById("hero");
-    const badge = document.getElementById("profileBadge");
-    if (!hero || !badge || !canHover || reduceMotion) return;
+    const layer = document.getElementById("lanyard");
+    const card = document.getElementById("lanyardCard");
+    if (!hero || !layer || !card) return;
 
-    const frame = badge.querySelector(".badge__frame");
+    const face = card.querySelector(".lanyard__face");
+    const anchorEl = layer.querySelector(".lanyard__anchor");
+    const hint = document.getElementById("lanyardHint");
+    const strapPaths = layer.querySelectorAll(".lanyard__strap path");
 
-    // ---- Konfigurasi ----
-    const MAX_TILT = 10;   // derajat kemiringan maksimal
-    const MAX_SHIFT = 10;  // px pergeseran parallax maksimal
-    const EASE = 0.12;     // 0–1: makin kecil = makin halus/berat
+    // ---- Konfigurasi fisika (silakan utak-atik) ----
+    const SEGMENTS = 10;          // jumlah ruas tali
+    const STEP = 1 / 120;         // langkah simulasi tetap (detik)
+    const GRAVITY = 7000;         // px/detik² — makin besar ayunan makin cepat & kartu terasa makin berat
+    const DAMPING = reduceMotion
+      ? 0.988                     // reduced motion: cepat tenang, minim ayunan
+      : 0.9972;                   // 1 = tak pernah berhenti; makin kecil makin cepat diam
+    const ITERATIONS = 16;        // akurasi kekakuan tali
+    const WIND = 220;             // hembusan angin halus agar kartu tetap "mengambang" (0 = diam total)
+    const MAX_STEP_SPEED = 40;    // batas kecepatan per langkah (anti meledak saat dilempar)
+    const ANCHOR_Y = -30;         // titik gantung sedikit di atas layar → tali muncul dari luar
+    const NUDGE = 0.011;          // kekuatan senggolan mouse tanpa klik (0 = nonaktif)
 
-    const target = { rx: 0, ry: 0, tx: 0, ty: 0, sx: 30, sy: 20 };
-    const current = { rx: 0, ry: 0, tx: 0, ty: 0, sx: 30, sy: 20 };
+    const N1 = SEGMENTS;          // titik atas kartu (tempat klip)
+    const N2 = SEGMENTS + 1;      // titik bawah kartu
 
-    let rafId = null;
-    let pointerInside = false;
+    let pts = [];                 // titik: {x, y, px, py, w}  (px/py = posisi sebelumnya, w = 1/massa)
+    let rest = [];                // panjang diam tiap ruas
+    let W = 0, H = 0;             // ukuran hero
+    let anchorX = 0, ropeLen = 0, cardW = 0, cardLen = 0;
+    let simT = 0, ry = 0;
 
-    function lerp(a, b, t) { return a + (b - a) * t; }
+    let dragging = false;
+    const grab = { id: null, cx: 0, cy: 0, x: 0, y: 0, t: 0, gx: 0 };
+
     function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+    function point(x, y, w) { return { x: x, y: y, px: x, py: y, w: w }; }
 
+    /* ---------- Susun ulang rantai dalam posisi menggantung ---------- */
+    function build(intro) {
+      const seg = ropeLen / SEGMENTS;
+      const ang = intro ? 0.28 : 0;                 // awal miring → berayun masuk saat dimuat
+      const sx = Math.sin(ang), cy = Math.cos(ang);
+
+      pts = []; rest = [];
+      for (let i = 0; i <= SEGMENTS; i++) {
+        const d = i * seg;
+        pts.push(point(anchorX + sx * d, ANCHOR_Y + cy * d, i === 0 ? 0 : (i === N1 ? 0.4 : 1)));
+        if (i < SEGMENTS) rest.push(seg);
+      }
+      const d2 = ropeLen + cardLen;
+      pts.push(point(anchorX + sx * d2, ANCHOR_Y + cy * d2, 0.4));
+      rest.push(cardLen);
+      ry = 0;
+    }
+
+    /* ---------- Baca ukuran dari CSS (tanpa angka tertulis di JS) ---------- */
+    let firstLayout = true;
+    function layout() {
+      W = hero.clientWidth;
+      H = hero.clientHeight;
+      const ax = anchorEl.offsetLeft;
+      const ropeEnd = anchorEl.offsetHeight;        // posisi y atas kartu saat diam
+      const cw = card.offsetWidth;
+      const ch = card.offsetHeight;
+      if (!W || !cw) return;
+
+      const newRope = ropeEnd - ANCHOR_Y;
+      const changed = !pts.length || Math.abs(ax - anchorX) > 1 || Math.abs(newRope - ropeLen) > 1 ||
+                      Math.abs(cw - cardW) > 1 || Math.abs(ch - cardLen) > 1;
+      anchorX = ax; ropeLen = newRope; cardW = cw; cardLen = ch;
+
+      if (changed) {
+        build(firstLayout && !reduceMotion);
+        firstLayout = false;
+      }
+
+      // Petunjuk "Drag me" tepat di bawah posisi diam kartu
+      if (hint) {
+        hint.style.left = anchorX + "px";
+        hint.style.top = (ropeEnd + cardLen + 16) + "px";
+      }
+    }
+
+    /* ---------- Fisika ---------- */
+    function solve(i) {
+      const a = pts[i], b = pts[i + 1];
+      const wsum = a.w + b.w;
+      if (!wsum) return;
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const d = Math.hypot(dx, dy) || 1e-6;
+      const k = (d - rest[i]) / d / wsum;
+      a.x += dx * k * a.w; a.y += dy * k * a.w;
+      b.x -= dx * k * b.w; b.y -= dy * k * b.w;
+    }
+
+    // Tahan kartu tetap di dalam hero
+    function bounds() {
+      const minX = cardW / 2 + 2, maxX = W - cardW / 2 - 2;
+      for (let i = N1; i <= N2; i++) {
+        const p = pts[i];
+        if (maxX > minX) p.x = clamp(p.x, minX, maxX);
+        if (p.y > H - 4) p.y = H - 4;
+      }
+    }
+
+    // Titik yang sedang dipegang di kartu dipaksa mengikuti pointer
+    function applyGrab() {
+      const c1 = pts[N1], c2 = pts[N2];
+      let ux = c2.x - c1.x, uy = c2.y - c1.y;
+      const len = Math.hypot(ux, uy) || 1;
+      ux /= len; uy /= len;                         // sumbu-y kartu = (ux, uy); sumbu-x = (uy, -ux)
+
+      // pointer dikurangi offset samping (agar piksel yang dipegang tetap di bawah kursor)
+      let tx = grab.x - uy * grab.gx;
+      let ty = grab.y + ux * grab.gx;
+
+      // tali tidak bisa melar: batasi target ke jangkauan maksimal
+      const reach = (ropeLen + grab.t * cardLen) * 0.995;
+      const dx0 = tx - anchorX, dy0 = ty - ANCHOR_Y;
+      const dist = Math.hypot(dx0, dy0);
+      if (dist > reach) { tx = anchorX + dx0 * reach / dist; ty = ANCHOR_Y + dy0 * reach / dist; }
+
+      const t = grab.t;
+      const gxp = c1.x + (c2.x - c1.x) * t;
+      const gyp = c1.y + (c2.y - c1.y) * t;
+      const dx = tx - gxp, dy = ty - gyp;
+      const den = (1 - t) * (1 - t) + t * t;
+      const k1 = (1 - t) / den, k2 = t / den;
+      c1.x += dx * k1; c1.y += dy * k1;
+      c2.x += dx * k2; c2.y += dy * k2;
+    }
+
+    function step() {
+      simT += STEP;
+      const g = GRAVITY * STEP * STEP;
+      const wind = reduceMotion ? 0
+        : // frekuensi sengaja jauh di bawah frekuensi ayun alami kartu (±3 rad/dtk) → tidak beresonansi
+        (Math.sin(simT * 0.55) + 0.6 * Math.sin(simT * 1.25 + 1.7)) * WIND * STEP * STEP;
+      const last = pts.length - 1;
+
+      for (let i = 1; i <= last; i++) {
+        const p = pts[i];
+        let vx = (p.x - p.px) * DAMPING;
+        let vy = (p.y - p.py) * DAMPING;
+        const sp = Math.hypot(vx, vy);
+        if (sp > MAX_STEP_SPEED) { vx *= MAX_STEP_SPEED / sp; vy *= MAX_STEP_SPEED / sp; }
+        p.px = p.x; p.py = p.y;
+        p.x += vx + wind * (i / last);
+        p.y += vy + g;
+      }
+
+      for (let it = 0; it < ITERATIONS; it++) {
+        if (dragging) applyGrab();
+        if (it % 2 === 0) { for (let i = 0; i < last; i++) solve(i); }
+        else { for (let i = last - 1; i >= 0; i--) solve(i); }
+        bounds();
+      }
+      for (let k = 0; k < 4; k++) for (let i = 0; i < last; i++) solve(i);   // rapikan sisa regangan
+    }
+
+    /* ---------- Gambar ---------- */
     function render() {
-      let settled = true;
+      const c1 = pts[N1], c2 = pts[N2];
+      if (!isFinite(c1.x + c1.y + c2.x + c2.y)) { build(false); return; }    // jaring pengaman
 
-      for (const key in target) {
-        current[key] = lerp(current[key], target[key], EASE);
-        if (Math.abs(current[key] - target[key]) > 0.01) settled = false;
+      // Tali: kurva halus melewati titik-titik rantai
+      let d = "M" + pts[0].x.toFixed(1) + " " + pts[0].y.toFixed(1);
+      for (let i = 1; i < N1; i++) {
+        const p = pts[i], q = pts[i + 1];
+        d += " Q" + p.x.toFixed(1) + " " + p.y.toFixed(1) + " " +
+             ((p.x + q.x) / 2).toFixed(1) + " " + ((p.y + q.y) / 2).toFixed(1);
       }
+      d += " L" + c1.x.toFixed(1) + " " + c1.y.toFixed(1);
+      for (let i = 0; i < strapPaths.length; i++) strapPaths[i].setAttribute("d", d);
 
-      frame.style.transform =
-        "translate3d(" + current.tx.toFixed(2) + "px, " + current.ty.toFixed(2) + "px, 0) " +
-        "rotateX(" + current.rx.toFixed(2) + "deg) " +
-        "rotateY(" + current.ry.toFixed(2) + "deg)";
+      // Kartu: berputar mengikuti sumbu antara dua titiknya
+      const theta = Math.atan2(-(c2.x - c1.x), c2.y - c1.y);
+      card.style.transform =
+        "translate3d(" + (c1.x - cardW / 2).toFixed(2) + "px, " + c1.y.toFixed(2) + "px, 0) " +
+        "rotate(" + theta.toFixed(4) + "rad)";
 
-      frame.style.setProperty("--shine-x", current.sx.toFixed(1) + "%");
-      frame.style.setProperty("--shine-y", current.sy.toFixed(1) + "%");
-
-      if (!settled || pointerInside) {
-        rafId = requestAnimationFrame(render);
-      } else {
-        rafId = null; // loop berhenti total saat idle → hemat CPU
-      }
+      // Kesan 3D: kartu sedikit "memutar" mengikuti kecepatan sampingnya
+      const vx = ((c1.x - c1.px) + (c2.x - c2.px)) / 2 / STEP;
+      ry += (clamp(vx * 0.018, -22, 22) - ry) * 0.12;
+      face.style.transform = "perspective(900px) rotateY(" + ry.toFixed(2) + "deg)";
+      card.style.setProperty("--shine-x", (50 + ry * 2.2 - theta * 30).toFixed(1) + "%");
+      card.style.setProperty("--shine-y", (28 + Math.abs(ry) * 0.7).toFixed(1) + "%");
     }
 
-    function startLoop() {
-      if (rafId === null) rafId = requestAnimationFrame(render);
+    /* ---------- Loop animasi ---------- */
+    let rafId = null, lastTime = 0, acc = 0, quiet = 0;
+    let visible = true;
+
+    function updateGrabPosition() {
+      const r = hero.getBoundingClientRect();       // dihitung ulang tiap frame (halaman bisa di-scroll)
+      grab.x = grab.cx - r.left;
+      grab.y = grab.cy - r.top;
     }
 
-    hero.addEventListener("pointermove", function (e) {
-      const rect = frame.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
+    function energy() {
+      let e = 0;
+      for (let i = 1; i < pts.length; i++) e += Math.abs(pts[i].x - pts[i].px) + Math.abs(pts[i].y - pts[i].py);
+      return e;
+    }
 
-      const dx = clamp((e.clientX - cx) / (rect.width * 2), -1, 1);
-      const dy = clamp((e.clientY - cy) / (rect.height * 2), -1, 1);
+    function frame(now) {
+      rafId = requestAnimationFrame(frame);
+      if (!lastTime) lastTime = now;
+      acc += Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
 
-      target.ry = dx * MAX_TILT;
-      target.rx = -dy * MAX_TILT;
-      target.tx = dx * MAX_SHIFT;
-      target.ty = dy * MAX_SHIFT;
-      target.sx = 50 + dx * 60;
-      target.sy = 35 + dy * 60;
+      if (dragging) updateGrabPosition();
+      let n = 0;
+      while (acc >= STEP && n < 6) { step(); acc -= STEP; n++; }
+      if (n === 6) acc = 0;
+      render();
 
-      pointerInside = true;
-      startLoop();
+      // Reduced motion: tanpa angin, jadi loop boleh tidur saat kartu sudah diam
+      if (reduceMotion && !dragging && energy() < 0.3) { if (++quiet > 30) stop(); }
+      else quiet = 0;
+    }
+
+    function start() {
+      if (rafId !== null || !visible || document.hidden) return;
+      lastTime = 0; acc = 0; quiet = 0;
+      rafId = requestAnimationFrame(frame);
+    }
+
+    function stop() {
+      if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+    }
+
+    /* ---------- Interaksi mouse / sentuh ---------- */
+    function hideHint() { if (hint) hint.classList.add("is-hidden"); }
+
+    function release(e) {
+      if (!dragging || e.pointerId !== grab.id) return;
+      dragging = false;
+      grab.id = null;
+      card.classList.remove("is-dragging");
+    }
+
+    card.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      e.preventDefault();
+      try { card.setPointerCapture(e.pointerId); } catch (err) {}
+
+      const r = hero.getBoundingClientRect();
+      const px = e.clientX - r.left, py = e.clientY - r.top;
+      const c1 = pts[N1], c2 = pts[N2];
+      let ux = c2.x - c1.x, uy = c2.y - c1.y;
+      const len = Math.hypot(ux, uy) || 1;
+      ux /= len; uy /= len;
+
+      // titik pegangan dalam koordinat kartu: sepanjang sumbu (gy) dan ke samping (gx)
+      const gy = (px - c1.x) * ux + (py - c1.y) * uy;
+      grab.gx = (px - c1.x) * uy + (py - c1.y) * -ux;
+      grab.t = clamp(gy / len, 0, 1);
+      grab.id = e.pointerId;
+      grab.cx = e.clientX; grab.cy = e.clientY;
+      grab.x = px; grab.y = py;
+
+      dragging = true;
+      card.classList.add("is-dragging");
+      hideHint();
+      start();
     });
 
-    frame.addEventListener("pointerenter", function () {
-      frame.classList.add("is-tilting");
+    card.addEventListener("pointermove", function (e) {
+      if (dragging) {
+        if (e.pointerId === grab.id) { grab.cx = e.clientX; grab.cy = e.clientY; }
+        return;
+      }
+      if (e.pointerType !== "mouse") return;
+      // Senggolan: mouse yang melintas mendorong kartu sedikit
+      const mx = clamp(e.movementX || 0, -40, 40) * NUDGE;
+      const my = clamp(e.movementY || 0, -40, 40) * NUDGE;
+      const c1 = pts[N1], c2 = pts[N2];
+      c2.px -= mx; c2.py -= my;
+      c1.px -= mx * 0.4; c1.py -= my * 0.4;
+      start();
     });
 
-    frame.addEventListener("pointerleave", function () {
-      frame.classList.remove("is-tilting");
+    card.addEventListener("pointerup", release);
+    card.addEventListener("pointercancel", release);
+    card.addEventListener("lostpointercapture", release);
+
+    // Jangan mulai "drag gambar/teks" bawaan browser
+    card.addEventListener("dragstart", function (e) { e.preventDefault(); });
+
+    /* ---------- Hemat CPU: jeda jika tak terlihat ---------- */
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        if (visible) start(); else stop();
+      }).observe(hero);
+    }
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) stop(); else start();
     });
 
-    hero.addEventListener("pointerleave", function () {
-      pointerInside = false;
-      target.rx = 0; target.ry = 0;
-      target.tx = 0; target.ty = 0;
-      target.sx = 30; target.sy = 20;
-      startLoop();
-    });
+    /* ---------- Mulai ---------- */
+    layout();
+    if (!pts.length) return;                        // tidak ada ukuran (mis. elemen tersembunyi)
+    render();
+    layer.classList.add("is-ready");
+    start();
+
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(function () { layout(); if (pts.length) { render(); start(); } }).observe(hero);
+    } else {
+      window.addEventListener("resize", function () { layout(); if (pts.length) { render(); start(); } });
+    }
   })();
 
 

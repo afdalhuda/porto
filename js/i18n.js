@@ -62,7 +62,7 @@ window.AFDAL_TEXT = {
   },
 
   "hero.cta1":   { en: "Explore My Work", id: "Lihat Karya Saya" },
-  "hero.cta2":   { en: "Get In Touchh",   id: "Hubungi Saya" },
+  "hero.cta2":   { en: "Get In Touch",   id: "Hubungi Saya" },
   "hero.scroll": { en: "Scroll",          id: "Gulir ke Bawah" },
 
 

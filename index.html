@@ -85,19 +85,6 @@
 
       <div class="hero__content">
 
-        <!-- Foto profil (kokarde) dengan tilt 3D -->
-        <div class="badge" id="profileBadge" data-reveal>
-          <div class="badge__frame">
-            <!--
-              GANTI FOTO: hapus div .badge__placeholder di bawah,
-              lalu aktifkan tag <img> dengan foto kamu di assets/images/
-            -->
-            <!-- <div class="badge__placeholder" aria-hidden="true">AH</div> -->
-            <img src="assets/images/profile.jpg" alt="Foto M. Afdal Huda" class="badge__photo" />
-            <div class="badge__shine" aria-hidden="true"></div>
-          </div>
-        </div>
-
         <h1 class="hero__title" data-reveal data-reveal-delay="1">
           <span data-i18n="hero.greeting">Hi, My name is</span>
           <span class="hero__name">M.&nbsp;Afdal&nbsp;Huda<span class="hero__name-dot">.</span></span>
@@ -117,6 +104,39 @@
           <a href="#contact" class="btn btn--ghost" data-i18n="hero.cta2">Get In Touch</a>
         </div>
 
+      </div>
+
+      <!-- ===== KOKARDE LANYARD (interaktif, hanya ada di beranda) =====
+           Fisika tali + kartu dihitung di js/script.js (Modul 2).
+           Titik gantung = .lanyard__anchor; panjang tali diatur --rope di CSS.
+           GANTI FOTO: ganti file assets/images/profile.jpg (rasio kotak/portrait paling pas). -->
+      <div class="lanyard" id="lanyard" aria-hidden="true">
+        <span class="lanyard__anchor"></span>
+
+        <!-- Tali: 3 path ditumpuk (tepi gelap, pita warna, jahitan putus-putus) -->
+        <svg class="lanyard__strap" focusable="false">
+          <path class="lanyard__edge"></path>
+          <path class="lanyard__band"></path>
+          <path class="lanyard__stitch"></path>
+        </svg>
+
+        <div class="lanyard__card" id="lanyardCard">
+          <div class="lanyard__face">
+            <span class="lanyard__slot"></span>
+            <span class="lanyard__tag" data-i18n="badge.tag">.</span>
+            <div class="lanyard__photo">
+              <img src="assets/images/profile.jpg" alt="" draggable="false" />
+            </div>
+            <p class="lanyard__name">M. Afdal Huda</p>
+            <p class="lanyard__role" data-i18n="badge.role">Informatics Management Student</p>
+            <span class="lanyard__barcode"></span>
+            <span class="lanyard__shine"></span>
+          </div>
+          <!-- Klip logam yang menjepit tali ke kartu -->
+          <span class="lanyard__clip"></span>
+        </div>
+
+        <p class="lanyard__hint" id="lanyardHint" data-i18n="badge.hint">Drag me</p>
       </div>
 
       <a href="#about" class="hero__scroll" aria-label="Scroll ke bawah">
@@ -240,7 +260,7 @@
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                   <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4-4-6 6-2-2-6 6"/>
                 </svg>
-              </div>-->
+              </div> -->
               <img src="assets/images/mibers.png" alt="Tampilan Portal-MiBers" loading="lazy" />
             </div>
             <div class="project-card__body">
@@ -304,7 +324,7 @@
             <div class="timeline__node" aria-hidden="true"></div>
             <div class="timeline__card glass-card">
               <span class="timeline__period" data-i18n="edu.e1p">Now</span>
-              <h3 class="timeline__title" data-i18n="edu.e1t">Informatics Management PNP</h3>
+              <h3 class="timeline__title" data-i18n="edu.e1t">Informatics Management</h3>
               <p class="timeline__desc" data-i18n="edu.e1d">Currently studying — focusing on programming, information systems, and technology.</p>
             </div>
           </li>
@@ -316,22 +336,14 @@
               <p class="timeline__desc" data-i18n="edu.e2d">[Nama sekolah] — where my interest in technology began to grow.</p>
             </div>
           </li>
-          <li class="timeline__item" data-reveal data-reveal-delay="2">
+          <li class="timeline__item" data-reveal data-reveal-delay="3">
             <div class="timeline__node" aria-hidden="true"></div>
             <div class="timeline__card glass-card">
               <span class="timeline__period" data-i18n="edu.e4p">Year — Year</span>
-              <h3 class="timeline__title" data-i18n="edu.e4t">Senior High School</h3>
-              <p class="timeline__desc" data-i18n="edu.e4d">[Nama sekolah] — where my interest in technology began to grow.</p>
+              <h3 class="timeline__title" data-i18n="edu.e4t">Junior High School</h3>
+              <p class="timeline__desc" data-i18n="edu.e4d">[Nama sekolah] — early curiosity about computers.</p>
             </div>
           </li>
-          <!--<li class="timeline__item" data-reveal data-reveal-delay="3">
-            <div class="timeline__node" aria-hidden="true"></div>
-            <div class="timeline__card glass-card">
-              <span class="timeline__period" data-i18n="edu.e3p">Year — Year</span>
-              <h3 class="timeline__title" data-i18n="edu.e3t">Junior High School</h3>
-              <p class="timeline__desc" data-i18n="edu.e3d">[Nama sekolah] — early curiosity about computers.</p>
-            </div>
-          </li> -->
         </ol>
       </div>
     </section>

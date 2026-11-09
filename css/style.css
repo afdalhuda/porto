@@ -1,7 +1,7 @@
 /* ============================================
    AFDAL PORTFOLIO — STYLE (FINAL)
    1. Tokens      2. Base       3. Spotlight
-   4. Navbar      5. Hero       6. Badge
+   4. Navbar      5. Hero       6. Lanyard badge
    7. Buttons     8. Sections   9. Reveal
    10. Responsive & Motion   11. Transisi tema
    ============================================ */
@@ -50,6 +50,16 @@
   /* Cahaya yang mengikuti kursor */
   --spotlight-core: rgba(255, 122, 24, 0.20);
   --spotlight-mid:  rgba(255, 122, 24, 0.07);
+
+  /* Kokarde lanyard */
+  --card-bg: linear-gradient(160deg, #1f1f24 0%, #101013 100%);
+  --card-border: rgba(255, 255, 255, 0.12);
+  --card-text: #F5F5F5;
+  --card-sub: #9CA3AF;
+  --card-slot: rgba(0, 0, 0, 0.75);
+  --strap-edge: #8f420a;
+  --strap-band: #FF7A18;
+  --strap-stitch: rgba(255, 255, 255, 0.5);
 }
 
 /* Tema terang */
@@ -84,6 +94,15 @@
 
   --spotlight-core: rgba(226, 97, 10, 0.17);
   --spotlight-mid:  rgba(226, 97, 10, 0.06);
+
+  --card-bg: linear-gradient(160deg, #FFFFFF 0%, #EDF0F6 100%);
+  --card-border: rgba(15, 20, 40, 0.10);
+  --card-text: #171A21;
+  --card-sub: #525A68;
+  --card-slot: rgba(15, 20, 40, 0.30);
+  --strap-edge: #9e3f06;
+  --strap-band: #E2610A;
+  --strap-stitch: rgba(255, 255, 255, 0.6);
 }
 
 /* ---------- 2. BASE ---------- */
@@ -411,7 +430,7 @@ main, .navbar, .footer { position: relative; z-index: 1; }
 
 .hero__scroll {
   position: absolute;
-  bottom: 15px; left: 50%;
+  bottom: 5px; left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -448,76 +467,236 @@ main, .navbar, .footer { position: relative; z-index: 1; }
   100% { transform: translateY(0);    opacity: 0; }
 }
 
-/* ---------- 6. BADGE (foto profil) ---------- */
-.badge {
-  perspective: 700px;
-  animation: badgeFloat 5.5s ease-in-out infinite;
+/* ---------- 6. LANYARD BADGE (kokarde interaktif) ----------
+   Kartu portrait + tali yang tergantung dari tepi atas halaman (tembus ke
+   belakang navbar). Posisi tiap frame dihitung JS (fisika Verlet) — CSS hanya
+   mengatur ukuran & tampilan. Layer ada DI DALAM #hero → hanya muncul di beranda. */
+.hero {
+  --badge-w: clamp(160px, 44vw, 184px);        /* lebar kartu */
+  --badge-h: calc(var(--badge-w) * 1.6);       /* rasio portrait kartu ID */
+  --rope: 120px;                               /* jarak titik gantung → atas kartu */
 }
 
-@keyframes badgeFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-12px); }
-}
-
-.badge__frame {
-  position: relative;
-  width: clamp(140px, 20vw, 190px);
-  aspect-ratio: 1;
-  border-radius: 32px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  overflow: hidden;
-  box-shadow:
-    inset 0 1px 0 var(--glass-highlight),
-    0 0 0 1px rgba(255, 122, 24, 0.25),
-    0 0 40px rgba(255, 122, 24, 0.18),
-    0 20px 50px rgba(0, 0, 0, 0.5);
-  will-change: transform;
-  transform: translate3d(0, 0, 0);
-}
-
-.badge__frame.is-tilting {
-  box-shadow:
-    inset 0 1px 0 var(--glass-highlight),
-    0 0 0 1px rgba(255, 122, 24, 0.45),
-    0 0 60px rgba(255, 122, 24, 0.30),
-    0 24px 60px rgba(0, 0, 0, 0.55);
-  transition: box-shadow var(--transition);
-}
-
-.badge__frame:active {
-  transform: scale(0.97);
-  transition: transform 0.15s ease;
-}
-
-.badge__placeholder {
-  width: 100%; height: 100%;
-  display: grid;
-  place-items: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(2.6rem, 5vw, 3.6rem);
-  color: var(--accent);
-  background: linear-gradient(145deg, #1c1c1c, #0d0d0d);
-}
-
-.badge__photo {
-  width: 100%; height: 100%;
-  object-fit: cover;
-}
-
-.badge__shine {
+.lanyard {
   position: absolute;
   inset: 0;
+  z-index: 2;                  /* di atas teks hero (1), di bawah navbar (100) */
+  pointer-events: none;        /* hanya kartu yang menangkap mouse */
+  opacity: 0;
+  transition: opacity 0.9s ease 0.1s;
+}
+
+.lanyard.is-ready { opacity: 1; }
+
+/* Titik gantung tak terlihat: JS membaca posisi (left) & panjang tali (height) darinya */
+.lanyard__anchor {
+  position: absolute;
+  top: 0; left: 50%;
+  width: 0; height: var(--rope);
+  visibility: hidden;
+}
+
+/* --- Tali --- */
+.lanyard__strap {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  overflow: visible;
+}
+
+.lanyard__strap path { fill: none; stroke-linejoin: round; stroke-linecap: butt; }
+.lanyard__edge   { stroke: var(--strap-edge);   stroke-width: 22px; }
+.lanyard__band   { stroke: var(--strap-band);   stroke-width: 18px; }
+.lanyard__stitch { stroke: var(--strap-stitch); stroke-width: 1.6px; stroke-dasharray: 7 6; }
+
+/* --- Kartu --- */
+.lanyard__card {
+  position: absolute;
+  top: 0; left: 0;
+  width: var(--badge-w);
+  height: var(--badge-h);
+  font-size: calc(var(--badge-w) / 15);        /* semua ukuran dalam em → skala otomatis */
+  transform-origin: 50% 0;                     /* berputar dari titik klip */
+  will-change: transform;
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;                          /* seret di layar sentuh tidak men-scroll halaman */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lanyard__card.is-dragging { cursor: grabbing; }
+
+.lanyard__face {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 0.85em 1em 1em;
+  border-radius: 1.3em;
+  overflow: hidden;
+  color: var(--card-text);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 0 0 1px rgba(255, 122, 24, 0.22),
+    0 0.9em 2.4em rgba(0, 0, 0, 0.38);
+  will-change: transform;
+}
+
+/* Garis aksen di tepi atas kartu */
+.lanyard__face::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 0.35em;
+  background: linear-gradient(90deg, var(--accent), #FFB169);
+}
+
+/* Lubang tempat klip */
+.lanyard__slot {
+  align-self: center;
+  flex: none;
+  width: 3.4em; height: 0.6em;
+  margin-top: 0.2em;
+  border-radius: 1em;
+  background: var(--card-slot);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+.lanyard__tag {
+  flex: none;
+  text-align: center;
+  font-size: 0.66em;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.lanyard__photo {
+  flex: none;
+  aspect-ratio: 1 / 1.02;
+  border-radius: 0.9em;
+  overflow: hidden;
+  background: var(--media-bg);
+  border: 1px solid var(--card-border);
+}
+
+.lanyard__photo img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.lanyard__name {
+  margin-top: 0.2em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.28em;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.lanyard__role {
+  margin-top: -0.2em;
+  font-size: 0.8em;
+  color: var(--card-sub);
+}
+
+.lanyard__barcode {
+  margin-top: auto;
+  flex: none;
+  height: 1.7em;
+  border-radius: 2px;
+  opacity: 0.5;
+  background: repeating-linear-gradient(90deg,
+    var(--card-text) 0 2px,   transparent 2px 4px,
+    var(--card-text) 4px 5px, transparent 5px 8px,
+    var(--card-text) 8px 11px, transparent 11px 13px,
+    var(--card-text) 13px 14px, transparent 14px 17px);
+}
+
+/* Kilau yang bergeser mengikuti gerak kartu (--shine-x/y diisi JS) */
+.lanyard__shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background: radial-gradient(
     circle at var(--shine-x, 30%) var(--shine-y, 20%),
-    rgba(255, 255, 255, 0.28) 0%,
-    rgba(255, 255, 255, 0.07) 32%,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.06) 32%,
     transparent 62%
   );
-  pointer-events: none;
+}
+
+/* Klip logam: ujung bawahnya menembus lubang kartu, ujung atasnya menjepit tali */
+.lanyard__clip {
+  position: absolute;
+  top: -2.1em; left: 50%;
+  width: 1.9em; height: 3.7em;
+  transform: translateX(-50%);
+  border-radius: 0.6em 0.6em 0.4em 0.4em;
+  background: linear-gradient(90deg, #6f747d 0%, #f1f3f7 34%, #a9aeb8 62%, #565b64 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.22);
+}
+
+.lanyard__clip::after {
+  content: "";
+  position: absolute;
+  top: 0.6em; left: 50%;
+  width: 0.7em; height: 1.2em;
+  transform: translateX(-50%);
+  border-radius: 0.4em;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Petunjuk kecil di bawah kartu; hilang setelah kartu pertama kali diseret */
+.lanyard__hint {
+  position: absolute;
+  margin: 0;
+  transform: translateX(-50%);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition: opacity 0.5s ease;
+}
+
+.lanyard__hint.is-hidden { opacity: 0; }
+
+/* --- Tata letak hero: HP/tablet = kartu di atas, teks di bawah (rata tengah) --- */
+@media (max-width: 899px) {
+  .lanyard__edge   { stroke-width: 19px; }
+  .lanyard__band   { stroke-width: 15px; }
+
+  .hero__content {
+    /* sisakan ruang untuk tali + kartu (padding-top hero 110–120px sudah terhitung) */
+    margin-top: calc(var(--rope) + var(--badge-h) - 40px);
+  }
+}
+
+/* --- Desktop: teks ke kiri, kokarde menggantung di kanan --- */
+@media (min-width: 900px) {
+  .hero {
+    --badge-w: clamp(190px, 17vw, 232px);
+    --rope: clamp(150px, 24vh, 230px);
+    text-align: left;
+  }
+
+  /* Titik gantung = 78% lebar kontainer 1080px (selalu berada di bawah navbar) */
+  .lanyard__anchor { left: calc(50% + 0.28 * min(92%, 1080px)); }
+
+  .hero__content {
+    align-self: center;
+    width: min(92%, 1080px);
+    max-width: none;
+    align-items: flex-start;
+    padding-right: 44%;          /* ruang untuk kokarde */
+  }
+
+  .hero__title { font-size: clamp(2.6rem, 5vw, 4.4rem); }
+  .hero__actions { justify-content: flex-start; }
 }
 
 /* ---------- 7. BUTTONS ---------- */
@@ -861,8 +1040,6 @@ main, .navbar, .footer { position: relative; z-index: 1; }
   transform: translateY(0);
 }
 
-/* Badge punya animasi float sendiri → reveal-nya hanya fade */
-.badge.reveal { transform: none; }
 
 /* ---------- 10. RESPONSIVE & MOTION ---------- */
 @media (max-width: 720px) {
@@ -936,7 +1113,7 @@ main, .navbar, .footer { position: relative; z-index: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .badge, .hero__scroll-mouse span, .hero__blob { animation: none; }
+  .hero__scroll-mouse span, .hero__blob { animation: none; }
   .reveal {
     opacity: 1;
     transform: none;
