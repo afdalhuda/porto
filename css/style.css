@@ -169,8 +169,8 @@ main, .navbar, .footer { position: relative; z-index: 1; }
   border-radius: var(--radius-pill);
   background: var(--navbar-bg);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   box-shadow:
     inset 0 1px 0 var(--glass-highlight),
     0 8px 32px rgba(0, 0, 0, 0.45);
@@ -304,39 +304,48 @@ main, .navbar, .footer { position: relative; z-index: 1; }
   z-index: 0;
 }
 
+/* PERFORMA: dulu tiap blob memakai filter: blur(70px) yang dianimasikan terus →
+   GPU menghitung 4 blur raksasa di SETIAP frame (penyebab utama beban GPU).
+   Sekarang kelembutan berasal dari gradien itu sendiri: memudar halus sampai
+   transparan penuh tepat di tepi (closest-side), jadi tidak ada tepi tajam dan
+   tidak perlu filter. Ukuran blob diperbesar ±25% untuk jangkauan cahaya yang sama. */
 .hero__blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(70px);
+  opacity: 0.6;                 /* menyamai kelembutan blur lama (puncak warna dulu "tertumpulkan" blur) */
   will-change: transform;
   transform: translate3d(0, 0, 0);
 }
 
 .hero__blob--1 {
-  width: 48vmax; height: 48vmax;
+  width: 60vmax; height: 60vmax;
   left: -14%; top: -18%;
-  background: radial-gradient(circle at 35% 35%, var(--blob-1), transparent 70%);
+  margin: -6vmax 0 0 -6vmax;
+  background: radial-gradient(closest-side, var(--blob-1) 8%, transparent 100%);
   animation: lavaDrift1 26s ease-in-out infinite alternate;
 }
 
 .hero__blob--2 {
-  width: 40vmax; height: 40vmax;
+  width: 50vmax; height: 50vmax;
   right: -12%; top: 5%;
-  background: radial-gradient(circle at 60% 40%, var(--blob-2), transparent 70%);
+  margin: -5vmax -5vmax 0 0;
+  background: radial-gradient(closest-side, var(--blob-2) 8%, transparent 100%);
   animation: lavaDrift2 32s ease-in-out infinite alternate;
 }
 
 .hero__blob--3 {
-  width: 44vmax; height: 44vmax;
+  width: 55vmax; height: 55vmax;
   left: 10%; bottom: -25%;
-  background: radial-gradient(circle at 50% 50%, var(--blob-3), transparent 70%);
+  margin: 0 0 -5.5vmax -5.5vmax;
+  background: radial-gradient(closest-side, var(--blob-3) 8%, transparent 100%);
   animation: lavaDrift3 38s ease-in-out infinite alternate;
 }
 
 .hero__blob--4 {
-  width: 30vmax; height: 30vmax;
+  width: 38vmax; height: 38vmax;
   right: 15%; bottom: -8%;
-  background: radial-gradient(circle at 45% 55%, var(--blob-4), transparent 70%);
+  margin: 0 -4vmax -4vmax 0;
+  background: radial-gradient(closest-side, var(--blob-4) 8%, transparent 100%);
   animation: lavaDrift4 22s ease-in-out infinite alternate;
 }
 
@@ -364,6 +373,10 @@ main, .navbar, .footer { position: relative; z-index: 1; }
   100% { transform: translate3d(6vw, -8vh, 0) scale(1); }
 }
 
+/* Hero di luar layar / tab tidak aktif → animasi blob dijeda (class dipasang JS, Modul 2) */
+.hero.is-paused .hero__blob,
+.hero.is-paused .hero__scroll-mouse span { animation-play-state: paused; }
+
 .hero__glow {
   position: absolute;
   top: 12%; left: 50%;
@@ -374,7 +387,7 @@ main, .navbar, .footer { position: relative; z-index: 1; }
     rgba(255, 122, 24, 0.05) 40%,
     transparent 70%);
   pointer-events: none;
-  filter: blur(20px);
+  /* tanpa filter: gradien sudah memudar halus sampai transparan */
 }
 
 .hero__content {
@@ -719,6 +732,13 @@ main, .navbar, .footer { position: relative; z-index: 1; }
   box-shadow: 0 0 24px rgba(255, 122, 24, 0.35);
 }
 
+.btn--primary1 {
+  background: linear-gradient(135deg, #292929, #151515);
+  color: #FF9A45;
+  border: 1px solid #E2610A;
+  box-shadow: 0 0 20px rgba(226, 97, 10, 0.15);
+}
+
 .btn--primary:hover {
   transform: translateY(-3px);
   box-shadow: 0 0 40px rgba(255, 122, 24, 0.55);
@@ -986,6 +1006,15 @@ main, .navbar, .footer { position: relative; z-index: 1; }
   gap: 28px;
 }
 
+.contact__buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .contact__email { font-size: 1rem; }
 
 .contact__socials { display: flex; gap: 14px; }
@@ -1052,14 +1081,32 @@ main, .navbar, .footer { position: relative; z-index: 1; }
     Solusi: di mobile, navbar pakai background solid tanpa blur,
     sehingga blur liquid-glass panel menu bekerja normal.
   */
+  /* Blur navbar dipindah ke ::before supaya .navbar__inner sendiri TIDAK punya
+     backdrop-filter → blur panel menu (anaknya) tetap bekerja. */
   .navbar__inner {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: var(--navbar-bg-solid);
+    background: transparent;
   }
 
   .navbar.is-scrolled .navbar__inner {
-    background: var(--navbar-bg-solid);
+    background: transparent;
+  }
+
+  .navbar__inner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--navbar-bg);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    transition: background var(--transition);
+  }
+
+  .navbar.is-scrolled .navbar__inner::before {
+    background: var(--navbar-bg-scrolled);
   }
 
   .navbar__links {

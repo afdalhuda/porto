@@ -81,7 +81,7 @@ window.AFDAL_TEXT = {
   },
 
   "about.chip1": { en: "🎓 Informatics Management Student", id: "🎓 Mahasiswa Manajemen Informatika" },
-  "about.chip2": { en: "⚙️ Aspiring ENGINEER",              id: "⚙️ Calon ENGINEER" },
+  "about.chip2": { en: "⚙️ Aspiring Engineer",              id: "⚙️ Calon Engineer" },
   "about.chip3": { en: "💡 Technology Enthusiast",          id: "💡 Penggiat Teknologi" },
 
 
@@ -150,7 +150,7 @@ window.AFDAL_TEXT = {
   "edu.title": { en: "My {Journey}",      id: "Perjalanan {Akademik}" },
 
   "edu.e1p": { en: "Now", id: "Sekarang" },
-  "edu.e1t": { en: "Informatics Management PNP", id: "Manajemen Informatika PNP" },
+  "edu.e1t": { en: "Informatics Management", id: "Manajemen Informatika" },
   "edu.e1d": {
     en: "Currently studying at Padang State Polytechnic— focusing on programming, information systems, and technology.",
     id: "Saat ini sedang menempuh pendidikan di Politeknik Negeri Padang— berfokus pada pemrograman, sistem informasi, dan teknologi terapan.",
@@ -158,7 +158,7 @@ window.AFDAL_TEXT = {
 
   // TODO: isi tahun & nama sekolah yang sebenarnya
   "edu.e2p": { en: "2025 — 2026", id: "2025 — 2026" },
-  "edu.e2t": { en: "Mechanical Engginering", id: "Teknik Mesin" },
+  "edu.e2t": { en: "Mechanical Engineering", id: "Teknik Mesin" },
   "edu.e2d": {
     en: "I once studied Mechanical Engineering at Padang State University.",
     id: "Sempat berkuliah Teknik Mesin di Universitas Negeri Padang.",
@@ -190,6 +190,7 @@ window.AFDAL_TEXT = {
   },
 
   "contact.wa": { en: "Whatsapp Me", id: "WhatsApp Saya" },
+  "download.cv": { en: "Download CV", id: "Unduh CV" },
 
 
   /* ---------- FOOTER ---------- */

@@ -52,8 +52,10 @@
      • Fisika Verlet: rantai 10 ruas tali + kartu kaku (2 titik) di ujungnya
      • Seret kartu ke mana saja (mouse / sentuh), lepas → berayun & dilempar
      • Gerakkan mouse melewati kartu → kartu tersenggol sedikit
-     • Layer ada di dalam #hero → hanya di beranda; loop dijeda saat hero
-       tidak terlihat atau tab tidak aktif (hemat CPU)
+     • Layer ada di dalam #hero → hanya di beranda
+     • HEMAT DAYA: setelah kartu tenang, loop animasi TIDUR (0% CPU/GPU) dan
+       baru bangun saat disentuh, atau saat ada hembusan angin sesekali.
+       Loop juga dijeda saat hero tidak terlihat / tab tidak aktif.
      Ukuran/posisi diatur CSS (--badge-w, --rope, .lanyard__anchor).
      ============================================ */
   (function initLanyard() {
@@ -74,8 +76,13 @@
     const DAMPING = reduceMotion
       ? 0.988                     // reduced motion: cepat tenang, minim ayunan
       : 0.9972;                   // 1 = tak pernah berhenti; makin kecil makin cepat diam
+    const DAMPING_SETTLE = 0.985; // saat ayunan sudah kecil → cepat tenang agar loop bisa tidur
+    const SETTLE_ENERGY = 3;      // ambang "ayunan kecil" (±3°)
+    const SLEEP_ENERGY = 0.3;     // ambang "diam" → loop tidur
     const ITERATIONS = 16;        // akurasi kekakuan tali
-    const WIND = 220;             // hembusan angin halus agar kartu tetap "mengambang" (0 = diam total)
+    const WIND = 220;             // kekuatan hembusan angin sesekali (0 = tanpa angin sama sekali)
+    const GUST_EVERY = [14000, 26000];  // jeda antar hembusan (ms) — makin jarang makin hemat daya
+    const GUST_LEN = [2.2, 3.6];        // lama satu hembusan (detik)
     const MAX_STEP_SPEED = 40;    // batas kecepatan per langkah (anti meledak saat dilempar)
     const ANCHOR_Y = -30;         // titik gantung sedikit di atas layar → tali muncul dari luar
     const NUDGE = 0.011;          // kekuatan senggolan mouse tanpa klik (0 = nonaktif)
@@ -88,6 +95,8 @@
     let W = 0, H = 0;             // ukuran hero
     let anchorX = 0, ropeLen = 0, cardW = 0, cardLen = 0;
     let simT = 0, ry = 0;
+    let lastEnergy = 99;
+    const gust = { start: -99, len: 1, dir: 1 };
 
     let dragging = false;
     const grab = { id: null, cx: 0, cy: 0, x: 0, y: 0, t: 0, gx: 0 };
@@ -193,15 +202,18 @@
     function step() {
       simT += STEP;
       const g = GRAVITY * STEP * STEP;
-      const wind = reduceMotion ? 0
-        : // frekuensi sengaja jauh di bawah frekuensi ayun alami kartu (±3 rad/dtk) → tidak beresonansi
-        (Math.sin(simT * 0.55) + 0.6 * Math.sin(simT * 1.25 + 1.7)) * WIND * STEP * STEP;
+      // Hembusan: satu dorongan halus berbentuk lonceng (naik lalu turun), bukan angin terus-menerus
+      const u = (simT - gust.start) / gust.len;
+      const gusting = u >= 0 && u < 1;
+      const wind = gusting ? Math.sin(Math.PI * u) * gust.dir * WIND * STEP * STEP : 0;
+      // Ayunan kecil & tidak ada hembusan/pegangan → redaman lebih kuat agar cepat diam
+      const damp = (!dragging && !gusting && lastEnergy < SETTLE_ENERGY) ? DAMPING_SETTLE : DAMPING;
       const last = pts.length - 1;
 
       for (let i = 1; i <= last; i++) {
         const p = pts[i];
-        let vx = (p.x - p.px) * DAMPING;
-        let vy = (p.y - p.py) * DAMPING;
+        let vx = (p.x - p.px) * damp;
+        let vy = (p.y - p.py) * damp;
         const sp = Math.hypot(vx, vy);
         if (sp > MAX_STEP_SPEED) { vx *= MAX_STEP_SPEED / sp; vy *= MAX_STEP_SPEED / sp; }
         p.px = p.x; p.py = p.y;
@@ -275,9 +287,27 @@
       if (n === 6) acc = 0;
       render();
 
-      // Reduced motion: tanpa angin, jadi loop boleh tidur saat kartu sudah diam
-      if (reduceMotion && !dragging && energy() < 0.3) { if (++quiet > 30) stop(); }
+      // Kartu sudah diam → tidurkan loop (bangun lagi oleh sentuhan / hembusan / resize)
+      lastEnergy = energy();
+      const gusting = (simT - gust.start) < gust.len;
+      if (!dragging && !gusting && lastEnergy < SLEEP_ENERGY) { if (++quiet > 30) stop(); }
       else quiet = 0;
+    }
+
+    // Hembusan angin sesekali agar kartu terasa "hidup" tanpa loop yang terus berjalan
+    let gustTimer = null;
+    function rnd(range) { return range[0] + Math.random() * (range[1] - range[0]); }
+    function scheduleGust() {
+      if (reduceMotion || !WIND) return;
+      gustTimer = setTimeout(function () {
+        if (visible && !document.hidden && pts.length && !dragging) {
+          gust.start = simT;
+          gust.len = rnd(GUST_LEN);
+          gust.dir = Math.random() < 0.5 ? -1 : 1;
+          start();
+        }
+        scheduleGust();
+      }, rnd(GUST_EVERY));
     }
 
     function start() {
@@ -349,14 +379,19 @@
     card.addEventListener("dragstart", function (e) { e.preventDefault(); });
 
     /* ---------- Hemat CPU: jeda jika tak terlihat ---------- */
+    // class .is-paused juga menjeda animasi CSS blob lava (lihat style.css)
+    function syncPaused() { hero.classList.toggle("is-paused", !visible || document.hidden); }
+
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (entries) {
         visible = entries[0].isIntersecting;
+        syncPaused();
         if (visible) start(); else stop();
       }).observe(hero);
     }
 
     document.addEventListener("visibilitychange", function () {
+      syncPaused();
       if (document.hidden) stop(); else start();
     });
 
@@ -366,6 +401,7 @@
     render();
     layer.classList.add("is-ready");
     start();
+    scheduleGust();
 
     if ("ResizeObserver" in window) {
       new ResizeObserver(function () { layout(); if (pts.length) { render(); start(); } }).observe(hero);
